@@ -1,16 +1,37 @@
 // Build CLI ToDo application
 
+import * as fs from 'fs';
+
 interface Task {
   id: number;
   description: string;
 }
 
-let tasks: Task[] = [];
-let nextId = 1;
+const TASKS_FILE = 'tasks.json';
+
+function loadTasks(): Task[] {
+  if (fs.existsSync(TASKS_FILE)) {
+    const data = fs.readFileSync(TASKS_FILE, 'utf-8');
+    try {
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function saveTasks(tasks: Task[]) {
+  fs.writeFileSync(TASKS_FILE, JSON.stringify(tasks, null, 2));
+}
+
+let tasks: Task[] = loadTasks();
+let nextId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
 
 function addTask(description: string) {
   const task: Task = { id: nextId++, description };
   tasks.push(task);
+  saveTasks(tasks);
   console.log(`Added: [${task.id}] ${task.description}`);
 }
 
@@ -31,6 +52,7 @@ function removeTask(id: number) {
     return;
   }
   const removed = tasks.splice(index, 1)[0];
+  saveTasks(tasks);
   console.log(`Removed: [${removed.id}] ${removed.description}`);
 }
 
