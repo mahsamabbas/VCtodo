@@ -1,6 +1,7 @@
 // Build CLI ToDo application
 
 import * as fs from 'fs';
+import inquirer from 'inquirer';
 
 interface Task {
   id: number;
@@ -56,33 +57,60 @@ function removeTask(id: number) {
   console.log(`Removed: [${removed.id}] ${removed.description}`);
 }
 
-function runCli() {
-  const [,, command, ...args] = process.argv;
-  switch (command) {
-    case 'add':
-      if (args.length === 0) {
-        console.log('Usage: node main.js add <task description>');
-      } else {
-        addTask(args.join(' '));
+async function runInteractiveCli() {
+  let exit = false;
+  while (!exit) {
+    const { action } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'action',
+        message: 'What do you want to do?',
+        choices: ['Add Task', 'Remove Task', 'List Tasks', 'Exit'],
+      },
+    ]);
+
+    switch (action) {
+      case 'Add Task': {
+        const { description } = await inquirer.prompt([
+          {
+            type: 'input',
+            name: 'description',
+            message: 'Enter task description:',
+          },
+        ]);
+        addTask(description);
+        break;
       }
-      break;
-    case 'list':
-      listTasks();
-      break;
-    case 'remove':
-      if (args.length === 0 || isNaN(Number(args[0]))) {
-        console.log('Usage: node main.js remove <task id>');
-      } else {
-        removeTask(Number(args[0]));
+      case 'Remove Task': {
+        if (tasks.length === 0) {
+          console.log('No tasks to remove.');
+          break;
+        }
+        const { id } = await inquirer.prompt([
+          {
+            type: 'list',
+            name: 'id',
+            message: 'Select a task to remove:',
+            choices: tasks.map(task => ({ name: `[${task.id}] ${task.description}`, value: task.id })),
+          },
+        ]);
+        removeTask(id);
+        break;
       }
-      break;
-    default:
-      console.log('Usage: node main.js <add|list|remove> [args]');
+      case 'List Tasks': {
+        listTasks();
+        break;
+      }
+      case 'Exit': {
+        exit = true;
+        break;
+      }
+    }
   }
 }
 
 if (require.main === module) {
-  runCli();
+  runInteractiveCli();
 }
 
 export { addTask, listTasks, removeTask, loadTasks, saveTasks, Task };
