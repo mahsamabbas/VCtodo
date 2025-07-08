@@ -8,5 +8,8 @@
   "dependencies": {
     "inquirer": "^12.7.0",
     "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "start": "npx tsc main.ts && node main.js"
   }
 }
