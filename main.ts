@@ -56,26 +56,34 @@ function removeTask(id: number) {
   console.log(`Removed: [${removed.id}] ${removed.description}`);
 }
 
-const [,, command, ...args] = process.argv;
-
-switch (command) {
-  case 'add':
-    if (args.length === 0) {
-      console.log('Usage: node main.js add <task description>');
-    } else {
-      addTask(args.join(' '));
-    }
-    break;
-  case 'list':
-    listTasks();
-    break;
-  case 'remove':
-    if (args.length === 0 || isNaN(Number(args[0]))) {
-      console.log('Usage: node main.js remove <task id>');
-    } else {
-      removeTask(Number(args[0]));
-    }
-    break;
-  default:
-    console.log('Usage: node main.js <add|list|remove> [args]');
+function runCli() {
+  const [,, command, ...args] = process.argv;
+  switch (command) {
+    case 'add':
+      if (args.length === 0) {
+        console.log('Usage: node main.js add <task description>');
+      } else {
+        addTask(args.join(' '));
+      }
+      break;
+    case 'list':
+      listTasks();
+      break;
+    case 'remove':
+      if (args.length === 0 || isNaN(Number(args[0]))) {
+        console.log('Usage: node main.js remove <task id>');
+      } else {
+        removeTask(Number(args[0]));
+      }
+      break;
+    default:
+      console.log('Usage: node main.js <add|list|remove> [args]');
+  }
 }
+
+if (require.main === module) {
+  runCli();
+}
+
+export { addTask, listTasks, removeTask, loadTasks, saveTasks, Task };
+module.exports = { addTask, listTasks, removeTask, loadTasks, saveTasks };
